@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Rental Requests{% endblock %}
+
+{% block content %}
+<h2>Rental Requests for Your Properties</h2>
+
+<div class="table-responsive">
+    <table class="table table-bordered mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>Property</th>
+                <th>Requested By</th>
+                <th>Message</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in requests %}
+                <tr>
+                    <td>{{ req.property.title }}</td>
+                    <td>{{ req.tenant.username }}</td>
+                    <td>{{ req.message }}</td>
+                    <td>
+                        <span class="badge {% if req.status == 'Approved' %}bg-success{% elif req.status == 'Pending' %}bg-warning{% else %}bg-danger{% endif %}">
+                            {{ req.status }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if req.status == 'Pending' %}
+                            <form method="post" action="{% url 'update_request_status' req.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="status" value="Approved">
+                                <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                            </form>
+                            <form method="post" action="{% url 'update_request_status' req.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="status" value="Rejected">
+                                <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                            </form>
+                        {% else %}
+                            <span class="text-muted">No action needed</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5">No pending requests at the moment.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
